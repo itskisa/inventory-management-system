@@ -90,6 +90,9 @@ export default function SearchAppliance() {
         <div className={styles.container}>
             <NavBar />
             <h1 className={styles.title}>Search Appliance</h1>
+            <p className={styles.subtitle}>Find appliances by serial number, type, brand, or model.</p>
+
+            {notFound && <p className={styles.error}>No matching appliance found. <a href="/">← Back to Home</a></p>}
 
             <form onSubmit={handleSearch} noValidate>
 
@@ -131,11 +134,6 @@ export default function SearchAppliance() {
                     </p>
                 )}
 
-                {notFound && (
-                    <p className={styles.error} style={{ marginTop: "16px", marginBottom: 0 }}>
-                        No matching appliance found. <a href="/">← Back to Home</a>
-                    </p>
-                )}
             </form>
 
             {results && results.map((result, index) => (

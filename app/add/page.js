@@ -170,9 +170,10 @@ export default function AddAppliance() {
         <div className={styles.container}>
             <NavBar />
             <h1 className={styles.title}>Add Appliance</h1>
+            <p className={styles.subtitle}>Register a new appliance and link it to a user account.</p>
 
             {serverError && <p className={styles.error}>{serverError}</p>}
-            {successMessage && <p className={styles.success}>{successMessage} <a href="/">← Back to Home</a></p>}
+            {successMessage && <p className={styles.success}>{successMessage}<a href="/"> ← Back to Home</a></p>}
 
             <form onSubmit={handleSubmit} noValidate>
 
