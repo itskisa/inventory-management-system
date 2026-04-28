@@ -1,5 +1,5 @@
 .container {
-    max-width: 480px;
+    max-width: 640px;
     margin: 60px auto;
     padding: 40px;
     border-radius: 12px;
@@ -16,6 +16,19 @@
     justify-content: center;
     text-align: center;
     color: var(--accent);
+}
+
+.sectionTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 1px solid var(--input-bg);
+    padding-bottom: 8px;
+    margin: 60px 0 16px;
+}
+
+.sectionTitle:first-of-type {
+    margin-top: 0;
 }
 
 .select,
@@ -108,5 +121,18 @@
     margin-bottom: 12px;
     font-size: 0.9rem;
     line-height: 1.7;
+    color: var(--foreground);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.label {
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--foreground);
 }
