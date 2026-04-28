@@ -243,8 +243,8 @@ export async function GET(request) {
         }
 
         if (brand) {
-            conditions.push("a.Brand LIKE ?");
-            values.push(`%${brand}%`);
+            conditions.push("LOWER(a.Brand) = LOWER(?)");
+            values.push(brand);
         }
 
         if (model) {
