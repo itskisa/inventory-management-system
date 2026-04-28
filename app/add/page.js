@@ -15,6 +15,7 @@ const APPLIANCE_TYPES = [
 
 export default function AddAppliance() {
 
+    // user field states
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [address, setAddress] = useState("");
@@ -22,6 +23,7 @@ export default function AddAppliance() {
     const [email, setEmail] = useState("");
     const [eircode, setEircode] = useState("");
 
+    // appliance field states
     const [applianceType, setApplianceType] = useState("");
     const [brand, setBrand] = useState("");
     const [modelNumber, setModelNumber] = useState("");
@@ -30,23 +32,35 @@ export default function AddAppliance() {
     const [warrantyDate, setWarrantyDate] = useState("");
     const [cost, setCost] = useState("");
 
+    // validation error states
     const [errors, setErrors] = useState({});
 
+    // server response states
     const [serverError, setServerError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
+    // this clears all the errors before each new validation run
     function clearErrors() {
         setErrors({});
         setServerError("");
         setSuccessMessage("");
     }
 
+    // this handles the client side validation, which runs before the api call to give instant feedback
     function validateClient() {
         clearErrors();
 
         const newErrors = {};
 
         const nameRegex = /^[A-Za-z\s]{1,50}$/;
+        const mobileRegex = /^(\+353|0)(8[3-9])\d{7}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const eircodeRegex = /^[A-Z0-9]{3}\s?[A-Z0-9]{4}$/;
+        const brandRegex = /^[A-Za-z0-9\s\-]{1,50}$/;
+        const modelRegex = /^\d{3}-\d{3}-\d{4}$/;
+        const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
+
+        const costNum = parseFloat(cost);
 
         if (!nameRegex.test(firstName.trim())) {
             newErrors.firstName = "First name: letters only, max 50 chars";
@@ -60,19 +74,13 @@ export default function AddAppliance() {
             newErrors.address = "Address must be 3–100 characters";
         }
 
-        const mobileRegex = /^(\+353|0)(8[3-9])\d{7}$/;
-
         if (!mobileRegex.test(mobile.trim())) {
             newErrors.mobile = "Enter a valid Irish mobile (e.g. 0831234567)";
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
         if (!emailRegex.test(email.trim())) {
             newErrors.email = "Enter a valid email address";
         }
-
-        const eircodeRegex = /^[A-Z0-9]{3}\s?[A-Z0-9]{4}$/;
 
         if (!eircodeRegex.test(eircode.trim().toUpperCase())) {
             newErrors.eircode = "Enter a valid Eircode (e.g. D01 1234)";
@@ -81,20 +89,14 @@ export default function AddAppliance() {
         if (!applianceType) {
             newErrors.applianceType = "Please select an appliance type";
         }
-
-        const brandRegex = /^[A-Za-z0-9\s\-]{1,50}$/;
         
         if (!brandRegex.test(brand.trim())) {
             newErrors.brand = "Brand: letters/numbers only, max 50 chars";
         }
 
-        const modelRegex = /^\d{3}-\d{3}-\d{4}$/;
-
         if (!modelRegex.test(modelNumber.trim())) {
             newErrors.modelNumber = "Format must be 000-000-0000";
         }
-
-        const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
 
         if (!serialRegex.test(serialNumber.trim())) {
             newErrors.serialNumber = "Format must be 0000-0000-0000";
@@ -112,8 +114,6 @@ export default function AddAppliance() {
             newErrors.warrantyDate = "Warranty date cannot be before purchase date";
         }
 
-        const costNum = parseFloat(cost);
-
         if (isNaN(costNum) || costNum <= 0) {
             newErrors.cost = "Enter a valid cost greater than 0";
         }
@@ -123,9 +123,11 @@ export default function AddAppliance() {
         return Object.keys(newErrors).length === 0;
     }
 
+    // this handles the form submission. it first validates, then it calls for the api
     async function handleSubmit(event) {
         event.preventDefault();
 
+        // stops if the client validation fails
         if (!validateClient()) {
             return;
         }
@@ -145,6 +147,7 @@ export default function AddAppliance() {
         if (data.success) {
             setSuccessMessage("New appliance has been added successfully");
 
+            // resets all the form fields after a successful submission
             setFirstName("");
             setLastName("");
             setAddress("");
@@ -169,7 +172,7 @@ export default function AddAppliance() {
             <h1 className={styles.title}>Add Appliance</h1>
 
             {serverError && <p className={styles.error}>{serverError}</p>}
-            {successMessage && <p className={styles.success}>{successMessage} <a href="/">← Back to Home</a></p>}
+            {successMessage && <p className={styles.success}>{successMessage}</p>}
 
             <form onSubmit={handleSubmit} noValidate>
 
