@@ -13,7 +13,7 @@ export default function SearchAppliance() {
     const [modelNumber, setModelNumber] = useState("");
 
     const [errors, setErrors] = useState("");
-    const [results, setResult] = useState(null);
+    const [results, setResults] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const [serverError, setServerError] = useState("");
 
@@ -22,7 +22,7 @@ export default function SearchAppliance() {
 
         // this resets states before 
         setErrors("");
-        setResult(null);
+        setResults(null);
         setNotFound(false);
         setServerError("");
 
@@ -41,11 +41,11 @@ export default function SearchAppliance() {
             return;
         }
 
-        if (serial || !serialRegex.test(serialNumber.trim())) {
+        if (serial && !serialRegex.test(serial)) {
             newErrors.serial = "Format must be 0000-0000-0000";
         }
 
-        if (model || !modelRegex.test(modelNumber.trim())) {
+        if (model && !modelRegex.test(model)) {
             newErrors.model = "Format must be 000-000-0000";
         }
 
@@ -78,7 +78,7 @@ export default function SearchAppliance() {
         const data = await response.json();
 
         if (data.success) {
-            setResults(data.appliances);
+            setResults(data.appliance);
         } else if (response.status === 404) {
             setNotFound(true);
         } else {
