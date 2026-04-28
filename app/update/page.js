@@ -35,10 +35,12 @@ export default function UpdateAppliance() {
     async function handleLookup(event) {
         event.preventDefault();
 
+        // this resets states before each new lookup attempt
         setSerialError("");
         setNotFound(false);
         setAppliance(null);
 
+        // this validates the serial number format before making the api call
         const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
 
         if (!serialRegex.test(serial.trim())) {
@@ -54,14 +56,18 @@ export default function UpdateAppliance() {
             return;
         }
 
+        // this takes the first result and populates all of the editable fields
         const a = data.appliance[0];
 
         setAppliance(a);
         setBrand(a.Brand);
         setApplianceType(a.ApplianceType);
         setModelNumber(a.ModelNumber);
+
+        // this splits off the time portion returned by mysql to get just the data string
         setPurchaseDate(a.PurchaseDate?.split("T")[0] || "");
         setWarrantyDate(a.WarrantyExpDate?.split("T")[0] || "");
+
         setCost(a.Cost);
         setFirstName(a.FirstName);
         setLastName(a.LastName);
@@ -126,12 +132,14 @@ export default function UpdateAppliance() {
             newErrors.warrantyDate = "Required";
         }
 
+        // this checks if the warranty date is not before the purchase date
         if (purchaseDate && warrantyDate && new Date(warrantyDate) < new Date(purchaseDate)) {
             newErrors.warrantyDate = "Must be after purchase date";
         }
 
         const costNum = parseFloat(cost);
 
+        // this validates cost is a positive number
         if (isNaN(costNum) || costNum <= 0) {
             newErrors.cost = "Enter a valid cost";
         }
@@ -144,16 +152,17 @@ export default function UpdateAppliance() {
     async function handleUpdate(event) {
         event.preventDefault();
 
+        // this resets messages before each submission attempt
         setServerError("");
         setSuccess("");
         setErrors({});
 
-        // stops if the validation fails
+        // this stops the submission if the client side validation fails
         if (!validate()){
             return;
         }
 
-        // sends a put request
+        // this sends the updated fields to the put request, using the serial number to update the record
         const res = await fetch("/api/appliances", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
