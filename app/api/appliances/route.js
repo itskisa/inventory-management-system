@@ -133,16 +133,16 @@ export async function POST(request) {
             "Select UserID from user WHERE Email = ?", [email]
         );
 
-        let userId;
-
+        // this checks if the email is already registered to an existing user
         if (existingUser.length > 0) {
-            // if an existing user is found, link the appliance onto their account
-            userId = existingUser[0].UserID;
-        } else {
-            // if a new user is created, insert their information to the users table first
-            const [userResult] = await pool.query(
+            return Response.json(
+                { success: false, message: "An account with this email already exists."},
+                { status: 409 }
+            );
+        }
+
+        const [userResult] = await pool.query(
                 'INSERT INTO user (FirstName, LastName, Address, Mobile, Email, Eircode) VALUES (?, ?, ?, ?, ?, ?)',
-                
                 [
                     escapeHtml(firstName.trim()),
                     escapeHtml(lastName.trim()),
@@ -153,8 +153,7 @@ export async function POST(request) {
                 ]
             );
             
-            userId = userResult.insertId;
-        }
+        const userId = userResult.insertId;
 
         // this inserts the appliance, linkking it to the user using userid, which is the foreign key
         await pool.query(
@@ -281,5 +280,66 @@ export async function GET(request) {
     } catch (error) {
         console.error("GET /api/appliances error:", error);
         return Response.json({ success: false, message: "Server error"}, { status: 500 });
+    }
+}
+
+// this updates an existing appliance and its associated user details
+export async function PUT(request) {
+    try {
+        const body = await request.json();
+        const {
+            serialNumber, brand, applianceType, modelNumber,
+            purchaseDate, warrantyDate, cost,
+            firstName, lastName, address, mobile, email, eircode
+        } = body;
+
+        // this validates the serial number format
+        const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
+
+        if (!serialRegex.test(serialNumber)) {
+            return Response.json({ success: false, message: "Invalid serial number" }, { status: 400 });
+        }
+
+        // this checks if the appliance exists in the database
+        const [rows] = await pool.query(
+            "SELECT ApplianceID, UserID FROM appliance WHERE SerialNumber = ?",
+            [serialNumber]
+        );
+
+        if (rows.length === 0) {
+            return Response.json(
+                { success: false, message: "Appliance not found" }, 
+                { status: 404 }
+            );
+        }
+
+        const { ApplianceID, UserID } = rows[0];
+
+        // this updates the appliance details
+        await pool.query(
+            `UPDATE appliance
+             SET ApplianceType=?, Brand=?, ModelNumber=?, PurchaseDate=?, WarrantyExpDate=?, Cost=?
+             WHERE ApplianceID=?`,
+            [applianceType, brand, modelNumber, purchaseDate, warrantyDate, parseFloat(cost), ApplianceID]
+        );
+
+        // this updates the associated user details
+        await pool.query(
+            `UPDATE user SET FirstName=?, LastName=?, Address=?, Mobile=?, Eircode=? WHERE UserID=?`,
+            [firstName, lastName, address, mobile, eircode.toUpperCase(), UserID]
+        );
+
+        return Response.json({ 
+            success: true, 
+            message: "Appliance has been updated." 
+        });
+
+    } catch (error) {
+        console.error("PUT /api/appliances error:", error);
+
+        return Response.json(
+            { success: false, message: "Server error" }, 
+            { status: 500 }
+        );
     }
 }
