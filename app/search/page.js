@@ -20,7 +20,7 @@ export default function SearchAppliance() {
     async function handleSearch(event) {
         event.preventDefault();
 
-        // this resets states before 
+        // this resets states before each new search attempt    
         setErrors("");
         setResults(null);
         setNotFound(false);
@@ -41,21 +41,23 @@ export default function SearchAppliance() {
             return;
         }
 
+        // this validates the serial number format only if one was provided
         if (serial && !serialRegex.test(serial)) {
             newErrors.serial = "Format must be 0000-0000-0000";
         }
 
+        // this validates the model number format only if one was provided
         if (model && !modelRegex.test(model)) {
             newErrors.model = "Format must be 000-000-0000";
         }
 
-        // if the validation error exists, stop
+        // this stops the search any format errors were found
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
 
-        // this builds the query parameters dynamically
+        // this builds the query parameters dynamically based on whichever fields were filled in 
         const params = new URLSearchParams();
 
         if (serial) {
@@ -78,6 +80,7 @@ export default function SearchAppliance() {
         const data = await response.json();
 
         if (data.success) {
+            // this stores the results array to be mapped over in the results section below
             setResults(data.appliance);
         } else if (response.status === 404) {
             setNotFound(true);
