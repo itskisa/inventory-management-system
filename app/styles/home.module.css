@@ -1,0 +1,62 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--background);
+    font-family: "Outfit", sans-serif;
+    padding: 40px;
+}
+
+.title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: var(--subtext);
+    margin-bottom: 48px;
+    text-align: center;
+}
+
+.links {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 32px 40px;
+    background: var(--surface);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--foreground);
+    width: 200px;
+    text-align: center;
+    transition: opacity 0.15s;
+}
+
+.card:hover {
+    opacity: 0.85;
+}
+
+.cardTitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.cardDesc {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--subtext);
+}
