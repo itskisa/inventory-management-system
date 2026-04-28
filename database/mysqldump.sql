@@ -60,7 +60,7 @@ CREATE TABLE `user` (
   `FirstName` varchar(50) NOT NULL,
   `LastName` varchar(50) NOT NULL,
   `Address` varchar(100) NOT NULL,
-  `Mobile` varchar(100) NOT NULL,
+  `Mobile` varchar(15) NOT NULL,
   `Email` varchar(100) NOT NULL,
   `Eircode` varchar(10) NOT NULL,
   PRIMARY KEY (`UserID`),
@@ -87,4 +87,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-28  9:02:52
+-- Dump completed on 2026-04-28  9:40:45
