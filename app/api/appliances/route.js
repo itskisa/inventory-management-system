@@ -146,4 +146,38 @@ export async function POST(request) {
         console.error("POST /api/appliances error: ", error);
         return Response.json({ success: false, message: "Server error. Please try again." }, { status: 500} );
     }
+
+    
+}
+
+// this helps search for an appliance by serial number
+export async function GET(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const serial = searchParams.get("serial");
+
+        const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
+        if (!serial || !serialRegex.test(serial)) {
+            return Response.json({ success: false, message: "Invalid serial number format" }, { status: 400});
+        }
+
+        // this retrieves appliance details along with the linked user's information
+        const [rows] = await pool.query(
+            `SELECT a.*, u.FirstName, u.LastName, u.Address, u.Mobile, u.Email, u.Eircode
+            FROM appliance a
+            JOIN user u ON a.UserID = u.UserID
+            WHERE a.SerialNumber = ?`,
+            [serial]
+        );
+
+        if (rows.length === 0) {
+            return Response.json({ success: false, message: "No matching appliance found!" }, { status: 404 });
+        }
+
+        return Response.json({ success: true, appliance: rows[0] });
+
+    } catch (error) {
+        console.error("GET /api/appliances error:", error);
+        return Response.json({ success: false, message: "Server error"}, { status: 500 });
+    }
 }
