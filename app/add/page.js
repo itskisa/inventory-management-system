@@ -172,7 +172,7 @@ export default function AddAppliance() {
             <h1 className={styles.title}>Add Appliance</h1>
 
             {serverError && <p className={styles.error}>{serverError}</p>}
-            {successMessage && <p className={styles.success}>{successMessage}</p>}
+            {successMessage && <p className={styles.success}>{successMessage} <a href="/">← Back to Home</a></p>}
 
             <form onSubmit={handleSubmit} noValidate>
 
