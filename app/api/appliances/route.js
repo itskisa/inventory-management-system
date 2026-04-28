@@ -40,6 +40,7 @@ export async function POST(request) {
 
         const costNum = parseFloat(cost);
 
+        // this validates first and last name format
         if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
             return Response.json(
                 { success: false, message: "Invalid name format" }, 
@@ -47,6 +48,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the address length
         if (!address || address.trim().length < 3) {
             return Response.json(
                 { success: false, message: "Invalid address" }, 
@@ -54,6 +56,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the irish mobile number format
         if (!mobileRegex.test(mobile)) {
             return Response.json(
                 { success: false, message: "Invalid mobile number" }, 
@@ -61,6 +64,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the email format
         if (!emailRegex.test(email)) {
             return Response.json(
                 { success: false, message: "Invalid email" }, 
@@ -68,6 +72,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the eircode format
         if (!eircodeRegex.test(eircode.toUpperCase())) {
             return Response.json(
                 { success: false, message: "Invalid Eircode" }, 
@@ -75,6 +80,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the appliance type against the allowed list
         if (!validTypes.includes(applianceType)) {
             return Response.json(
                 { success: false, message: "Invalid appliance type" }, 
@@ -82,6 +88,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the model number format (000-000-0000)
         if (!modelRegex.test(modelNumber)) {
             return Response.json(
                 { success: false, message: "Invalid model number format" }, 
@@ -89,6 +96,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates the serial number format (0000-0000-0000)
         if (!serialRegex.test(serialNumber)) {
             return Response.json(
                 { success: false, message: "Invalid serial number format" }, 
@@ -96,6 +104,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates that both dates are present are parseable
         if (!purchaseDate || !warrantyDate || isNaN(purchase) || isNaN(warranty)) {
             return Response.json(
                 { success: false, message: "Invalid dates" }, 
@@ -103,6 +112,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates that the warranty date is not before the purchase date
         if (warranty < purchase) {
             return Response.json(
                 { success: false, message: "Warranty cannot be before purchase date" }, 
@@ -110,6 +120,7 @@ export async function POST(request) {
             );
         }
 
+        // this validates that the cost is a positive number
         if (isNaN(costNum) || costNum <= 0) {
             return Response.json(
                 { success: false, message: "Invalid cost" }, 
@@ -119,7 +130,7 @@ export async function POST(request) {
         
         // Database Operations
 
-        // this checks if the serial number already exists
+        // this checks if the serial number is already registered to an existing appliance
         const [existing] = await pool.query(
             "Select ApplianceID FROM appliance WHERE SerialNumber = ?", [serialNumber]
         );
@@ -128,12 +139,11 @@ export async function POST(request) {
             return Response.json({success: false, message: "Appliance already exists" }, { status: 409 });
         }
 
-        // this checks if a user with the email exists already. if it does, use the same user id
+        // this checks if the email is already registered to an existing user
         const [existingUser] = await pool.query(
             "Select UserID from user WHERE Email = ?", [email]
         );
 
-        // this checks if the email is already registered to an existing user
         if (existingUser.length > 0) {
             return Response.json(
                 { success: false, message: "An account with this email already exists."},
@@ -141,6 +151,7 @@ export async function POST(request) {
             );
         }
 
+        // this inserts the new user and retrieves their generated ID
         const [userResult] = await pool.query(
                 'INSERT INTO user (FirstName, LastName, Address, Mobile, Email, Eircode) VALUES (?, ?, ?, ?, ?, ?)',
                 [
@@ -155,7 +166,7 @@ export async function POST(request) {
             
         const userId = userResult.insertId;
 
-        // this inserts the appliance, linkking it to the user using userid, which is the foreign key
+        // this inserts the appliance, linking it to the user using userid, which is the foreign key
         await pool.query(
             'INSERT INTO appliance (UserID, ApplianceType, Brand, ModelNumber, SerialNumber, PurchaseDate, WarrantyExpDate, Cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
 
@@ -181,11 +192,11 @@ export async function POST(request) {
     
 }
 
-// this helps search for an appliance by serial number
+// this helps search for an appliance by using one or more optional filters
 export async function GET(request) {
     try {
         
-        // this extracts the query parameters
+        // this extracts the query parameters from the request URL
         const { searchParams } = new URL(request.url);
 
         const serial = searchParams.get("serial")?.trim();
@@ -201,10 +212,11 @@ export async function GET(request) {
             );
         }
 
-        // validation patters for the model number and serial number
+        // validation patterns for the model number and serial number
         const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
         const modelRegex  = /^\d{3}-\d{3}-\d{4}$/;
 
+        // this validates the serial number format if provided
         if (serial && !serialRegex.test(serial)) {
             return Response.json(
                 { success: false, message: "Invalid serial number format" }, 
@@ -212,6 +224,7 @@ export async function GET(request) {
             );
         }
 
+        // this validates the model number format if provided
         if (model && !modelRegex.test(model)) {
             return Response.json(
                 { success: false, message: "Invalid model number format" }, 
@@ -221,6 +234,7 @@ export async function GET(request) {
 
         const validTypes = ["Fridge", "Washing Machine", "Dishwasher", "Dryer", "Oven", "Microwave"];
 
+        // this validates appliance type against the allowed list if provided
         if (type && !validTypes.includes(type)) {
             return Response.json(
                 { success: false, message: "Invalid appliance type" }, 
@@ -228,7 +242,7 @@ export async function GET(request) {
             );
         }
 
-        // this helps build a dynamic mysql query
+        // this dynamically builds the WHERE clause in mysql queries based on which filters were provided
         const conditions = [];
         const values = [];
 
@@ -243,7 +257,7 @@ export async function GET(request) {
         }
 
         if (brand) {
-            conditions.push("LOWER(a.Brand) = LOWER(?)");
+            conditions.push("LOWER(a.Brand) = LOWER(?)"); // this uses case-insensitive exact match for th ebrand
             values.push(brand);
         }
 
@@ -296,8 +310,12 @@ export async function PUT(request) {
         // this validates the serial number format
         const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
 
+        // this validates the serial number format
         if (!serialRegex.test(serialNumber)) {
-            return Response.json({ success: false, message: "Invalid serial number" }, { status: 400 });
+            return Response.json(
+                { success: false, message: "Invalid serial number" }, 
+                { status: 400 }
+            );
         }
 
         // this checks if the appliance exists in the database
@@ -320,13 +338,28 @@ export async function PUT(request) {
             `UPDATE appliance
              SET ApplianceType=?, Brand=?, ModelNumber=?, PurchaseDate=?, WarrantyExpDate=?, Cost=?
              WHERE ApplianceID=?`,
-            [applianceType, brand, modelNumber, purchaseDate, warrantyDate, parseFloat(cost), ApplianceID]
+            [
+                escapeHtml(applianceType), 
+                escapeHtml(brand.trim()), 
+                escapeHtml(modelNumber.trim()), 
+                purchaseDate, 
+                warrantyDate, 
+                parseFloat(cost), 
+                ApplianceID
+            ]
         );
 
         // this updates the associated user details
         await pool.query(
             `UPDATE user SET FirstName=?, LastName=?, Address=?, Mobile=?, Eircode=? WHERE UserID=?`,
-            [firstName, lastName, address, mobile, eircode.toUpperCase(), UserID]
+            [
+                escapeHtml(firstName.trim()), 
+                escapeHtml(lastName.trim()), 
+                escapeHtml(address.trim()), 
+                escapeHtml(mobile.trim()), 
+                escapeHtml(eircode.trim().toUpperCase()), 
+                UserID
+            ]
         );
 
         return Response.json({ 
@@ -337,6 +370,54 @@ export async function PUT(request) {
     } catch (error) {
         console.error("PUT /api/appliances error:", error);
 
+        return Response.json(
+            { success: false, message: "Server error" }, 
+            { status: 500 }
+        );
+    }
+}
+
+// this removes an appliance record from the database by serial number
+export async function DELETE(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const serial = searchParams.get("serial");
+
+        const serialRegex = /^\d{4}-\d{4}-\d{4}$/;
+
+        if (!serial || !serialRegex.test(serial)) {
+            return Response.json(
+                { success: false, message: "Invalid serial number format" }, 
+                { status: 400 }
+            );
+        }
+
+        // check the appliance exists before trying to delete
+        const [rows] = await pool.query(
+            "SELECT ApplianceID FROM appliance WHERE SerialNumber = ?",
+            [serial]
+        );
+
+        if (rows.length === 0) {
+            return Response.json(
+                { success: false, message: "No matching appliance found!" }, 
+                { status: 404 }
+            );
+        }
+
+        // this deletes the appliance record. the user record is kept in case they have other appliances
+        await pool.query(
+            "DELETE FROM appliance WHERE SerialNumber = ?",
+            [serial]
+        );
+
+        return Response.json({ 
+            success: true, 
+            message: "Appliance Deleted" 
+        });
+
+    } catch (error) {
+        console.error("DELETE /api/appliances error:", error);
         return Response.json(
             { success: false, message: "Server error" }, 
             { status: 500 }
