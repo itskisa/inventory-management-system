@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BackButton, Field } from "../components/components.js";
+import { NavBar, Field } from "../components/components.js";
 import styles from "../styles/part-b-c.module.css";
 
 const APPLIANCE_TYPES = [
@@ -168,7 +168,7 @@ export default function AddAppliance() {
 
     return (
         <div className={styles.container}>
-            <BackButton />
+            <NavBar />
             <h1 className={styles.title}>Add Appliance</h1>
 
             {serverError && <p className={styles.error}>{serverError}</p>}

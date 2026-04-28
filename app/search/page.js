@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BackButton, Field } from "../components/components.js";
+import { NavBar, Field } from "../components/components.js";
 import styles from "../styles/part-b-c.module.css";
 
 const APPLIANCE_TYPES = ["Fridge", "Washing Machine", "Dishwasher", "Dryer", "Oven", "Microwave"];
@@ -88,7 +88,7 @@ export default function SearchAppliance() {
 
     return (
         <div className={styles.container}>
-            <BackButton />
+            <NavBar />
             <h1 className={styles.title}>Search Appliance</h1>
 
             <form onSubmit={handleSearch} noValidate>

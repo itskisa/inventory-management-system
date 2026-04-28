@@ -29,3 +29,26 @@
 .backButton:hover {
     color: var(--foreground);
 }
+
+.nav {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.navLink {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: "Outfit", sans-serif;
+    background: var(--input-bg);
+    color: var(--foreground);
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.navLink:hover {
+    background: var(--surface);
+}
